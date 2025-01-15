@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0xa0d8f0); 
+scene.background = new THREE.Color(0x000000); // Чёрный фон
 
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.position.y = 10;
@@ -31,25 +31,25 @@ const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
 directionalLight.position.set(10, 20, 30);
 scene.add(directionalLight);
 
-const pyramidGeometry1 = new THREE.ConeGeometry(2.5, 10, 3); // Основание радиус = 2.5, высота = 10, треугольное основание
-const pyramidGeometry2 = new THREE.ConeGeometry(2.5, 20, 3); // Основание радиус = 2.5, высота = 20, треугольное основание
-const pyramidMaterials = [
+const sphereGeometry1 = new THREE.SphereGeometry(2.5, 32, 32); // Радиус = 2.5
+const sphereGeometry2 = new THREE.SphereGeometry(5, 32, 32); // Радиус = 5
+const sphereMaterials = [
   new THREE.MeshLambertMaterial({ color: 0xff5555 }),
   new THREE.MeshLambertMaterial({ color: 0x55ff55 }),
   new THREE.MeshLambertMaterial({ color: 0x5555ff })
 ];
 
 for (let i = 0; i < 300; i++) {
-  const geometry = i % 2 === 0 ? pyramidGeometry1 : pyramidGeometry2;
-  const material = pyramidMaterials[Math.floor(Math.random() * pyramidMaterials.length)];
+  const geometry = i % 2 === 0 ? sphereGeometry1 : sphereGeometry2;
+  const material = sphereMaterials[Math.floor(Math.random() * sphereMaterials.length)];
 
-  const pyramidLeft = new THREE.Mesh(geometry, material);
-  pyramidLeft.position.set(-20, geometry.parameters.height / 2, -i * 10);
-  scene.add(pyramidLeft);
+  const sphereLeft = new THREE.Mesh(geometry, material);
+  sphereLeft.position.set(-20, geometry.parameters.radius, -i * 10);
+  scene.add(sphereLeft);
 
-  const pyramidRight = new THREE.Mesh(geometry, material);
-  pyramidRight.position.set(20, geometry.parameters.height / 2, -i * 10);
-  scene.add(pyramidRight);
+  const sphereRight = new THREE.Mesh(geometry, material);
+  sphereRight.position.set(20, geometry.parameters.radius, -i * 10);
+  scene.add(sphereRight);
 }
 
 function animate() {
