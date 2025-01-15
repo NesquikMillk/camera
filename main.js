@@ -1,52 +1,60 @@
 import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
-// Инициализация сцены, камеры и рендера
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x000000);
+scene.background = new THREE.Color(0xa0d8f0); 
 
-const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 1000);
-camera.position.set(0, 0, 100);
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+camera.position.y = 10;
+camera.position.z = 5;
+const minZ = -3000;
+const maxZ = 20;
 
-const renderer = new THREE.WebGLRenderer({ antialias: true });
+window.addEventListener('wheel', (event) => {
+  event.preventDefault();
+
+  if (event.deltaY < 0) {
+    camera.position.z -= 5;
+  } else {
+    camera.position.z += 5;
+  }
+
+  camera.position.z = Math.max(minZ, Math.min(maxZ, camera.position.z));
+});
+
+const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setPixelRatio(window.devicePixelRatio);
-renderer.logarithmicDepthBuffer = true;
 document.body.appendChild(renderer.domElement);
 
-// Контролы для камеры
-const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true;
-controls.dampingFactor = 0.05;
-controls.minDistance = 10;
-controls.maxDistance = 500;
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+scene.add(ambientLight);
+const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+directionalLight.position.set(10, 20, 30);
+scene.add(directionalLight);
 
-// Добавление геометрий для демонстрации глубины
-const geometry = new THREE.SphereGeometry(5, 32, 32);
-const material = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true });
+const pyramidGeometry1 = new THREE.ConeGeometry(2.5, 10, 3); // Основание радиус = 2.5, высота = 10, треугольное основание
+const pyramidGeometry2 = new THREE.ConeGeometry(2.5, 20, 3); // Основание радиус = 2.5, высота = 20, треугольное основание
+const pyramidMaterials = [
+  new THREE.MeshLambertMaterial({ color: 0xff5555 }),
+  new THREE.MeshLambertMaterial({ color: 0x55ff55 }),
+  new THREE.MeshLambertMaterial({ color: 0x5555ff })
+];
 
-for (let i = 0; i < 100; i++) {
-  const mesh = new THREE.Mesh(geometry, material);
-  mesh.position.set(
-    (Math.random() - 0.5) * 500,
-    (Math.random() - 0.5) * 500,
-    (Math.random() - 0.5) * 500
-  );
-  scene.add(mesh);
+for (let i = 0; i < 300; i++) {
+  const geometry = i % 2 === 0 ? pyramidGeometry1 : pyramidGeometry2;
+  const material = pyramidMaterials[Math.floor(Math.random() * pyramidMaterials.length)];
+
+  const pyramidLeft = new THREE.Mesh(geometry, material);
+  pyramidLeft.position.set(-20, geometry.parameters.height / 2, -i * 10);
+  scene.add(pyramidLeft);
+
+  const pyramidRight = new THREE.Mesh(geometry, material);
+  pyramidRight.position.set(20, geometry.parameters.height / 2, -i * 10);
+  scene.add(pyramidRight);
 }
 
-// Анимация
 function animate() {
   requestAnimationFrame(animate);
-  controls.update();
   renderer.render(scene, camera);
 }
-
-// Обработка изменения размера окна
-window.addEventListener('resize', () => {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
-});
 
 animate();
